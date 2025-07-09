@@ -1,0 +1,25 @@
+<div class="cookie-consent-overlay" *ngIf="showConsent">
+  <div class="cookie-consent-modal">
+    <div class="cookie-consent-header">
+      <h3>🍪 Política de Cookies</h3>
+    </div>
+    <div class="cookie-consent-body">
+      <p>
+        Utilizamos cookies para melhorar sua experiência em nosso site. 
+        Os cookies nos ajudam a personalizar conteúdo, analisar o tráfego e 
+        fornecer funcionalidades essenciais.
+      </p>      <p>
+        Ao continuar navegando, você concorda com nossa 
+        <a (click)="downloadPrivacyPolicy()" class="pointer">Política de Privacidade</a>.
+      </p>
+    </div>
+    <div class="cookie-consent-actions">
+      <button class="btn-reject" (click)="rejectCookies()">
+        Rejeitar
+      </button>
+      <button class="btn-accept" (click)="acceptCookies()">
+        Aceitar Cookies
+      </button>
+    </div>
+  </div>
+</div>

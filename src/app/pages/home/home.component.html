@@ -1,0 +1,119 @@
+<div class="search-container">
+  <form [formGroup]="searchForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="tipoEstabelecimento">Tipo de Estabelecimento</label>
+        <select id="tipoEstabelecimento" formControlName="tipoEstabelecimento">
+          <option *ngFor="let tipo of tiposEstabelecimentos" [value]="tipo.value">{{ tipo.label }}</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label for="pais">País</label>
+        <select id="pais" formControlName="pais">
+          <option *ngFor="let pais of paises" [value]="pais.value">{{ pais.label }}</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="estado">Estado</label>
+        <select id="estado" formControlName="estado" [attr.disabled]="searchForm.get('estado')?.disabled ? true : null">
+          <option value="">Selecione um estado</option>
+          <option *ngFor="let estado of estados" [value]="estado.value">{{ estado.label }}</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label for="cidade">Cidade</label>
+        <select id="cidade" formControlName="cidade" [attr.disabled]="searchForm.get('cidade')?.disabled ? true : null">
+          <option value="">Selecione uma cidade</option>
+          <option *ngFor="let cidade of cidades" [value]="cidade.value">{{ cidade.label }}</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="bairro">Bairro</label>
+        <select id="bairro" formControlName="bairro" [attr.disabled]="searchForm.get('bairro')?.disabled ? true : null">
+          <option value="">Selecione um bairro (opcional)</option>
+          <option *ngFor="let bairro of bairros" [value]="bairro.value">{{ bairro.label }}</option>
+        </select>
+      </div>
+    </div>
+    
+    <button type="button" (click)="buscar()" [disabled]="searchForm.invalid">Buscar</button>
+  </form>
+</div>
+
+<!-- Spinner de loading -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
+<div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+
+<div class="table-container" *ngIf="resultados.length > 0">
+  <h3>Resultados encontrados: {{ resultados.length }}</h3>
+  
+  <div class="table-controls">
+    <div class="items-per-page">
+      <label for="itemsPerPage">Itens por página:</label>
+      <select id="itemsPerPage" [(ngModel)]="itemsPerPage" (change)="updatePagination()">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+  </div>
+  
+  <table class="results-table">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Endereço</th>
+        <th>Avaliação</th>
+        <th>Status</th>
+        <th>Tipos</th>
+        <th>Preço</th>
+        <th>Anúncios</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of paginatedResults">
+        <td><strong>{{ r.name || 'Sem nome' }}</strong></td>
+        <td>{{ r.vicinity || 'Endereço não disponível' }}</td>
+        <td>
+          <div class="rating">
+            <span *ngIf="r.rating">{{ r.rating }} ★</span>
+            <span *ngIf="r.user_ratings_total">({{ r.user_ratings_total }} avaliações)</span>
+            <span *ngIf="!r.rating">Sem avaliação</span>
+          </div>
+        </td>
+        <td>{{ r.business_status === 'OPERATIONAL' ? 'Aberto' : 'Fechado' }}</td>
+        <td>{{ r.types ? r.types.slice(0, 3).join(', ') : '' }}</td>
+        <td>{{ r.price_level ? '💰'.repeat(r.price_level) : 'N/A' }}</td>
+        <td>
+          <span *ngIf="r.hasAds === true" class="has-ads">✅ Possui anúncios</span>
+          <span *ngIf="r.hasAds === false" class="no-ads">❌ Sem anúncios</span>
+          <span *ngIf="r.hasAds === undefined" class="loading-ads">⏳ Verificando...</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <button [disabled]="currentPage === 1" (click)="changePage(1)">Primeira</button>
+    <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Anterior</button>
+    <span>Página {{ currentPage }} de {{ totalPages }}</span>
+    <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Próxima</button>
+    <button [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">Última</button>
+  </div>
+</div>
+
+<div *ngIf="resultados.length === 0 && searched" class="no-results">
+  Nenhum resultado encontrado. Tente outros termos ou localizações.
+</div>
